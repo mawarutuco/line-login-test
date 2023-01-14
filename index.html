@@ -7,20 +7,72 @@
     <title>Document</title>
   </head>
   <body>
-    <button onclick="lineLogin()">Line Login</button>
+    <button onclick="lineLogin()">1.Line Login</button>
+    <button onclick="getLineCode()">2.Get Line Code</button>
+    <button onclick="getLineToken()">3.Get Line Token</button>
     <script>
-      const channelID = "1657783309";
-      const channelSecret = "237043880f5192661078c643deafa6b1";
-      const redirect_uri = "https://mawarutuco.github.io/line-login-test/";
+      const client_id = "1657783309"; //Channel ID
+      const client_secret = "237043880f5192661078c643deafa6b1"; //Channel secret
+      const redirect_uri = "http://127.0.0.1:5500/index.html";
+      //   const redirect_uri = "https://mawarutuco.github.io/line-login-test/";
+      const queryObject = {};
 
       function lineLogin() {
-        let link = `https://access.line.me/oauth2/v2.1/authorize?
-        response_type=code
-        &client_id=${channelID}
-        &redirect_uri=${redirect_uri}
-        &state=login
-        &scope=profile%20openid`;
+        let link = "https://access.line.me/oauth2/v2.1/authorize?";
+        link += "response_type=code";
+        link += "&client_id=" + client_id;
+        link += "&redirect_uri=" + redirect_uri;
+        link += "&state=12345abcde";
+        link += "&scope=profile%20openid";
         window.location.href = link;
+      }
+
+      function getLineCode() {
+        const myURL = new URL(window.location.href);
+        const { searchParams } = myURL;
+        for (let [key, value] of searchParams.entries()) {
+          queryObject[key] = value;
+        }
+        console.log(myURL);
+        console.log(searchParams, searchParams.toString());
+        console.log(queryObject);
+        //queryObject={code: 'xxx', state: '12345abcde'}
+      }
+
+      async function getLineToken() {
+        // curl -v -X POST https://api.line.me/oauth2/v2.1/token \
+        // -H 'Content-Type: application/x-www-form-urlencoded' \
+        // -d 'grant_type=authorization_code' \
+        // -d 'code=1234567890abcde' \
+        // --data-urlencode 'redirect_uri=https://example.com/auth?key=value' \
+        // -d 'client_id=1234567890' \
+        // -d 'client_secret=1234567890abcdefghij1234567890ab' \
+        // -d 'code_verifier=wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1'
+
+        const code = queryObject.code;
+        const url = "https://api.line.me/oauth2/v2.1/token";
+        const headers = {
+          "Content-Type": "application/x-www-form-urlencoded",
+        };
+        const body = new URLSearchParams({
+          grant_type: "authorization_code",
+          code, //第一次拿的code
+          redirect_uri,
+          client_id, //Channel ID
+          client_secret, //Channel secret
+        });
+
+        const response = await postApi(url, headers, body);
+        console.log(response);
+        console.log(response.access_token);
+
+        function postApi(url, headers, body) {
+          return fetch(url, {
+            method: "POST",
+            headers: headers,
+            body,
+          }).then((response) => response.json());
+        }
       }
     </script>
   </body>
