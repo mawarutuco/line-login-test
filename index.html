@@ -8,5 +8,20 @@
   </head>
   <body>
     <button onclick="lineLogin()">Line Login</button>
+    <script>
+      const channelID = "1657783309";
+      const channelSecret = "237043880f5192661078c643deafa6b1";
+      const redirect_uri = "https://mawarutuco.github.io/line-login-test/";
+
+      function lineLogin() {
+        let link = `https://access.line.me/oauth2/v2.1/authorize?
+        response_type=code
+        &client_id=${channelID}
+        &redirect_uri=${redirect_uri}
+        &state=login
+        &scope=profile%20openid`;
+        window.location.href = link;
+      }
+    </script>
   </body>
 </html>
